@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // API base URL
-  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://91.99.157.24:3000/api';
 
   // Axios interceptor for automatic token handling
   useEffect(() => {
