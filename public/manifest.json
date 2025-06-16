@@ -1,0 +1,25 @@
+{
+  "short_name": "IQ Testim Admin",
+  "name": "IQ Testim Admin Panel",
+  "icons": [
+    {
+      "src": "whitelogo.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "whitelogo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "whitelogo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#FF9900",
+  "background_color": "#ffffff"
+}
