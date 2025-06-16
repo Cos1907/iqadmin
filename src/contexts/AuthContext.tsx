@@ -112,14 +112,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      console.log('Attempting login for:', email);
+      console.log('Attempting admin login for:', email);
       
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+      const response = await axios.post(`${API_BASE_URL}/auth/admin-login`, {
         email,
         password,
       });
 
-      console.log('Login response:', response.data);
+      console.log('Admin login response:', response.data);
 
       if (response.data.token && response.data.role === 'admin') {
         localStorage.setItem('adminToken', response.data.token);
@@ -129,14 +129,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: response.data.email,
           role: response.data.role,
         });
-        console.log('Login successful');
+        console.log('Admin login successful');
         return true;
       } else {
-        console.log('Login failed: Invalid response');
+        console.log('Admin login failed: Invalid response');
         return false;
       }
     } catch (error: any) {
-      console.error('Login failed:', error);
+      console.error('Admin login failed:', error);
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
       return false;
