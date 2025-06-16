@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
 export const API_ENDPOINTS = {
   // Auth
-  LOGIN: `${API_BASE_URL}/api/auth/login`,
+  LOGIN: `${API_BASE_URL}/api/auth/admin-login`,
   LOGOUT: `${API_BASE_URL}/api/auth/logout`,
   REFRESH_TOKEN: `${API_BASE_URL}/api/auth/refresh`,
   
