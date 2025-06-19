@@ -204,10 +204,7 @@ const Users: React.FC = () => {
                     <Box display="flex" alignItems="center">
                       <Box
                         component="img"
-                        src={user.selectedAvatar ? 
-                          `https://api.iqtestim.com/api/avatars/${user.selectedAvatar}` : 
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=FF9900&color=fff&size=40`
-                        }
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=FF9900&color=fff&size=40`}
                         alt="Avatar"
                         sx={{ 
                           width: 40, 
@@ -216,11 +213,6 @@ const Users: React.FC = () => {
                           mr: 2,
                           objectFit: 'cover',
                           border: '2px solid #e0e0e0'
-                        }}
-                        onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                          // Avatar yüklenemezse placeholder kullan
-                          const target = e.currentTarget;
-                          target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=FF9900&color=fff&size=40`;
                         }}
                       />
                       <Box>
