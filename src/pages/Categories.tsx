@@ -32,6 +32,7 @@ import {
   ToggleOn as ToggleIcon,
 } from '@mui/icons-material';
 import axios, { AxiosError } from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 interface Category {
   _id: string;
@@ -63,8 +64,6 @@ const Categories: React.FC = () => {
     sortOrder: 0,
   });
 
-  const API_BASE_URL = 'http://127.0.0.1:5000/api';
-
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -73,7 +72,7 @@ const Categories: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/categories`, {
+      const response = await axios.get(API_ENDPOINTS.CATEGORIES, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCategories(response.data.categories || []);
@@ -88,7 +87,7 @@ const Categories: React.FC = () => {
   const handleCreateCategory = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.post(`${API_BASE_URL}/categories`, formData, {
+      await axios.post(API_ENDPOINTS.CATEGORIES, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEditDialogOpen(false);
@@ -105,7 +104,7 @@ const Categories: React.FC = () => {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.put(
-        `${API_BASE_URL}/categories/${selectedCategory?._id}`,
+        `${API_ENDPOINTS.CATEGORIES}/${selectedCategory?._id}`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -125,7 +124,7 @@ const Categories: React.FC = () => {
     if (window.confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')) {
       try {
         const token = localStorage.getItem('adminToken');
-        await axios.delete(`${API_BASE_URL}/categories/${categoryId}`, {
+        await axios.delete(`${API_ENDPOINTS.CATEGORIES}/${categoryId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchCategories();
@@ -140,7 +139,7 @@ const Categories: React.FC = () => {
   const handleToggleStatus = async (categoryId: string) => {
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.patch(`${API_BASE_URL}/categories/${categoryId}/toggle`, {}, {
+      await axios.patch(`${API_ENDPOINTS.CATEGORIES}/${categoryId}/toggle`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchCategories();

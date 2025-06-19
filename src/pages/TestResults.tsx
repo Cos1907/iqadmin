@@ -131,7 +131,7 @@ const TestResults: React.FC = () => {
   const fetchResults = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/test-results', {
+      const response = await fetch('/api/test-results', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -153,7 +153,7 @@ const TestResults: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/test-results/analytics/overview', {
+      const response = await fetch('/api/test-results/analytics/overview', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -170,7 +170,7 @@ const TestResults: React.FC = () => {
 
   const fetchTests = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/tests', {
+      const response = await fetch('/api/tests', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -187,7 +187,7 @@ const TestResults: React.FC = () => {
 
   const handleViewDetails = async (resultId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/test-results/${resultId}`, {
+      const response = await fetch(`/api/test-results/${resultId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -210,7 +210,7 @@ const TestResults: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/test-results/${resultId}`, {
+      const response = await fetch(`/api/test-results/${resultId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`

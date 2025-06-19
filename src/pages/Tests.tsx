@@ -24,6 +24,9 @@ import {
   Rating,
   FormControlLabel,
   Checkbox,
+  Tabs,
+  Tab,
+  Snackbar,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -37,6 +40,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import FileUpload from '../components/FileUpload';
+import { API_ENDPOINTS, IMAGE_BASE_URL } from '../config/api';
 
 interface Test {
   _id: string;
@@ -71,6 +75,8 @@ const Tests: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [activeTab, setActiveTab] = useState(0); // 0: Aktif, 1: Pasif
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -80,8 +86,6 @@ const Tests: React.FC = () => {
     questions: [] as string[],
     image: '',
   });
-
-  const API_BASE_URL = 'http://127.0.0.1:5000/api';
 
   useEffect(() => {
     fetchTests();
@@ -93,7 +97,7 @@ const Tests: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/tests`, {
+      const response = await axios.get(API_ENDPOINTS.TESTS, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTests(response.data.tests || []);
@@ -108,7 +112,7 @@ const Tests: React.FC = () => {
   const fetchAvailableQuestions = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/questions`, {
+      const response = await axios.get(API_ENDPOINTS.QUESTIONS, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAvailableQuestions(response.data.questions || []);
@@ -120,7 +124,7 @@ const Tests: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/categories?isActive=true`, {
+      const response = await axios.get(`${API_ENDPOINTS.CATEGORIES}?isActive=true`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const categoryNames = response.data.categories.map((cat: any) => cat.name);
@@ -134,16 +138,30 @@ const Tests: React.FC = () => {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.put(
-        `${API_BASE_URL}/tests/${testId}`,
+        `${API_ENDPOINTS.TESTS}/${testId}`,
         { isActive: !isActive },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      fetchTests();
+      
+      // Başarı mesajı göster
+      const action = isActive ? 'durduruldu' : 'başlatıldı';
+      setSnackbar({
+        open: true,
+        message: `Test başarıyla ${action}`,
+        severity: 'success'
+      });
+      
+      // Testleri yenile
+      await fetchTests();
     } catch (error) {
       console.error('Error updating test status:', error);
-      setError('Test durumu güncellenirken hata oluştu');
+      setSnackbar({
+        open: true,
+        message: 'Test durumu güncellenirken hata oluştu',
+        severity: 'error'
+      });
     }
   };
 
@@ -151,7 +169,7 @@ const Tests: React.FC = () => {
     if (window.confirm('Bu testi silmek istediğinizden emin misiniz?')) {
       try {
         const token = localStorage.getItem('adminToken');
-        await axios.delete(`${API_BASE_URL}/tests/${testId}`, {
+        await axios.delete(`${API_ENDPOINTS.TESTS}/${testId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchTests();
@@ -209,7 +227,7 @@ const Tests: React.FC = () => {
         hasImage: !!selectedImage
       });
       
-      const response = await axios.post(`${API_BASE_URL}/tests`, formDataToSend, {
+      const response = await axios.post(API_ENDPOINTS.TESTS, formDataToSend, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -258,7 +276,7 @@ const Tests: React.FC = () => {
       }
       
       await axios.put(
-        `${API_BASE_URL}/tests/${selectedTest?._id}`,
+        `${API_ENDPOINTS.TESTS}/${selectedTest?._id}`,
         formDataToSend,
         {
           headers: { 
@@ -336,11 +354,25 @@ const Tests: React.FC = () => {
     return new Date(dateString).toLocaleDateString('tr-TR');
   };
 
-  const filteredTests = tests.filter((test) => {
-    const matchesSearch = test.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || test.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Aktif ve pasif testleri filtrele
+  const activeTests = tests.filter(test => test.isActive);
+  const inactiveTests = tests.filter(test => !test.isActive);
+
+  // Seçili sekmeye göre testleri filtrele
+  const getFilteredTests = () => {
+    const testList = activeTab === 0 ? activeTests : inactiveTests;
+    return testList.filter((test) => {
+      const matchesSearch = test.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || test.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  };
+
+  const filteredTests = getFilteredTests();
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
   return (
     <Box sx={{ p: 3 }}>
@@ -396,6 +428,26 @@ const Tests: React.FC = () => {
         </Box>
       </Paper>
 
+      {/* Sekmeler */}
+      <Paper sx={{ mb: 3 }}>
+        <Tabs value={activeTab} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tab 
+            label={`Aktif Testler (${activeTests.length})`} 
+            sx={{ 
+              color: activeTab === 0 ? 'primary.main' : 'text.secondary',
+              fontWeight: activeTab === 0 ? 'bold' : 'normal'
+            }}
+          />
+          <Tab 
+            label={`Pasif Testler (${inactiveTests.length})`} 
+            sx={{ 
+              color: activeTab === 1 ? 'primary.main' : 'text.secondary',
+              fontWeight: activeTab === 1 ? 'bold' : 'normal'
+            }}
+          />
+        </Tabs>
+      </Paper>
+
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
@@ -407,7 +459,7 @@ const Tests: React.FC = () => {
               {test.image && (
                 <Box sx={{ position: 'relative', height: 200, overflow: 'hidden' }}>
                   <img
-                    src={`http://127.0.0.1:5000${test.image}`}
+                    src={`${IMAGE_BASE_URL}${test.image}`}
                     alt={test.title}
                     style={{
                       width: '100%',
@@ -446,6 +498,11 @@ const Tests: React.FC = () => {
                     size="small"
                   />
                   <Chip label={`${test.timeLimit} dk`} size="small" />
+                  <Chip 
+                    label={test.isActive ? 'Aktif' : 'Pasif'} 
+                    color={test.isActive ? 'success' : 'default'} 
+                    size="small" 
+                  />
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <Rating value={test.rating} readOnly size="small" />
@@ -473,12 +530,30 @@ const Tests: React.FC = () => {
                 <IconButton
                   onClick={() => handleToggleTestStatus(test._id, test.isActive)}
                   color={test.isActive ? 'success' : 'default'}
+                  title={test.isActive ? 'Testi Durdur' : 'Testi Başlat'}
                 >
-                  {test.isActive ? <PlayIcon /> : <StopIcon />}
+                  {test.isActive ? <StopIcon /> : <PlayIcon />}
                 </IconButton>
               </CardActions>
             </Card>
           ))}
+        </Box>
+      )}
+
+      {/* Test bulunamadı mesajı */}
+      {!loading && filteredTests.length === 0 && (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="h6" color="textSecondary" gutterBottom>
+            {activeTab === 0 ? 'Aktif test bulunamadı' : 'Pasif test bulunamadı'}
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            {searchTerm || selectedCategory !== 'all' 
+              ? 'Arama kriterlerinizi değiştirmeyi deneyin' 
+              : activeTab === 0 
+                ? 'Henüz aktif test bulunmuyor' 
+                : 'Henüz pasif test bulunmuyor'
+            }
+          </Typography>
         </Box>
       )}
 
@@ -529,7 +604,7 @@ const Tests: React.FC = () => {
                     Mevcut Görsel:
                   </Typography>
                   <img
-                    src={`http://127.0.0.1:5000${formData.image}`}
+                    src={`${IMAGE_BASE_URL}${formData.image}`}
                     alt="Mevcut görsel"
                     style={{ maxWidth: 200, maxHeight: 150, objectFit: 'cover', borderRadius: 4 }}
                   />
@@ -634,7 +709,7 @@ const Tests: React.FC = () => {
               {selectedTest.image && (
                 <Box sx={{ mb: 3, textAlign: 'center' }}>
                   <img
-                    src={`http://127.0.0.1:5000${selectedTest.image}`}
+                    src={`${IMAGE_BASE_URL}${selectedTest.image}`}
                     alt={selectedTest.title}
                     style={{ maxWidth: '100%', maxHeight: 300, objectFit: 'contain' }}
                   />
@@ -680,6 +755,21 @@ const Tests: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

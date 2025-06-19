@@ -17,30 +17,24 @@ const Login: React.FC = () => {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
   
-  const [email, setEmail] = useState('asil@nevo.com');
-  const [password, setPassword] = useState('asil123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    console.log('Login form submitted');
 
     if (!email || !password) {
       setError(t('loginError') || 'E-posta ve şifre gerekli');
       return;
     }
 
-    console.log('Attempting login with:', { email, password });
-
     const success = await login(email, password);
-    console.log('Login result:', success);
     
     if (success) {
-      console.log('Login successful, navigating to dashboard');
       navigate('/');
     } else {
-      console.log('Login failed, showing error');
       setError(t('loginError') || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
     }
   };
@@ -116,6 +110,7 @@ const Login: React.FC = () => {
                 required
                 variant="outlined"
                 sx={{ mb: 2 }}
+                autoComplete="email"
               />
 
               <TextField
@@ -128,6 +123,7 @@ const Login: React.FC = () => {
                 required
                 variant="outlined"
                 sx={{ mb: 3 }}
+                autoComplete="current-password"
               />
 
               <Button

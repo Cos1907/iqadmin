@@ -35,6 +35,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import FileUpload from '../components/FileUpload';
+import { API_ENDPOINTS, IMAGE_BASE_URL } from '../config/api';
 
 interface Question {
   _id: string;
@@ -83,8 +84,6 @@ const Questions: React.FC = () => {
     timeLimit: 60,
   });
 
-  const API_BASE_URL = 'http://127.0.0.1:5000/api';
-
   useEffect(() => {
     fetchQuestions();
     fetchCategories();
@@ -94,7 +93,7 @@ const Questions: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/questions`, {
+      const response = await axios.get(API_ENDPOINTS.QUESTIONS, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setQuestions(response.data.questions || []);
@@ -109,7 +108,7 @@ const Questions: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/categories?isActive=true`, {
+      const response = await axios.get(`${API_ENDPOINTS.CATEGORIES}?isActive=true`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const categoryNames = response.data.categories.map((cat: any) => cat.name);
@@ -141,7 +140,7 @@ const Questions: React.FC = () => {
         formDataToSend.append('image', selectedImage);
       }
       
-      const response = await axios.post(`${API_BASE_URL}/questions`, formDataToSend, {
+      const response = await axios.post(API_ENDPOINTS.QUESTIONS, formDataToSend, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -158,7 +157,7 @@ const Questions: React.FC = () => {
           }
         });
         
-        await axios.post(`${API_BASE_URL}/questions/${response.data._id}/option-images`, optionFormData, {
+        await axios.post(`${API_ENDPOINTS.QUESTIONS}/${response.data._id}/option-images`, optionFormData, {
           headers: { 
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
@@ -200,7 +199,7 @@ const Questions: React.FC = () => {
       }
       
       await axios.put(
-        `${API_BASE_URL}/questions/${selectedQuestion?._id}`,
+        `${API_ENDPOINTS.QUESTIONS}/${selectedQuestion?._id}`,
         formDataToSend,
         {
           headers: { 
@@ -220,7 +219,7 @@ const Questions: React.FC = () => {
           }
         });
         
-        await axios.post(`${API_BASE_URL}/questions/${selectedQuestion?._id}/option-images`, optionFormData, {
+        await axios.post(`${API_ENDPOINTS.QUESTIONS}/${selectedQuestion?._id}/option-images`, optionFormData, {
           headers: { 
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
@@ -243,7 +242,7 @@ const Questions: React.FC = () => {
     if (window.confirm('Bu soruyu silmek istediğinizden emin misiniz?')) {
       try {
         const token = localStorage.getItem('adminToken');
-        await axios.delete(`${API_BASE_URL}/questions/${questionId}`, {
+        await axios.delete(`${API_ENDPOINTS.QUESTIONS}/${questionId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchQuestions();
@@ -436,9 +435,9 @@ const Questions: React.FC = () => {
                   <TableCell>
                     {question.image ? (
                       <img
-                        src={`http://127.0.0.1:5000${question.image}`}
-                        alt="Soru resmi"
-                        style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }}
+                        src={`${IMAGE_BASE_URL}${question.image}`}
+                        alt="Soru görseli"
+                        style={{ maxWidth: 200, maxHeight: 150, objectFit: 'cover', borderRadius: 4 }}
                       />
                     ) : (
                       <Typography variant="body2" color="textSecondary">
@@ -511,7 +510,7 @@ const Questions: React.FC = () => {
                       Mevcut Resim:
                     </Typography>
                     <img
-                      src={`http://127.0.0.1:5000${formData.image}`}
+                      src={`${IMAGE_BASE_URL}${formData.image}`}
                       alt="Mevcut resim"
                       style={{ maxWidth: 200, maxHeight: 200, objectFit: 'contain' }}
                     />
@@ -578,7 +577,7 @@ const Questions: React.FC = () => {
                             Mevcut Resim:
                           </Typography>
                           <img
-                            src={`http://127.0.0.1:5000${formData.optionImages[index]}`}
+                            src={`${IMAGE_BASE_URL}${formData.optionImages[index]}`}
                             alt={`Seçenek ${String.fromCharCode(65 + index)} resmi`}
                             style={{ maxWidth: 150, maxHeight: 150, objectFit: 'cover', borderRadius: 4 }}
                           />
@@ -718,7 +717,7 @@ const Questions: React.FC = () => {
                     Resim:
                   </Typography>
                   <img
-                    src={`http://127.0.0.1:5000${selectedQuestion.image}`}
+                    src={`${IMAGE_BASE_URL}${selectedQuestion.image}`}
                     alt="Soru resmi"
                     style={{ maxWidth: '100%', maxHeight: 300, objectFit: 'contain' }}
                   />
@@ -738,7 +737,7 @@ const Questions: React.FC = () => {
                   </Typography>
                   {selectedQuestion.optionImages && selectedQuestion.optionImages[index] && (
                     <img
-                      src={`http://127.0.0.1:5000${selectedQuestion.optionImages[index]}`}
+                      src={`${IMAGE_BASE_URL}${selectedQuestion.optionImages[index]}`}
                       alt={`Seçenek ${String.fromCharCode(65 + index)} resmi`}
                       style={{ width: 100, height: 100, objectFit: 'cover', marginTop: 8, borderRadius: 4 }}
                     />
@@ -792,4 +791,4 @@ const Questions: React.FC = () => {
   );
 };
 
-export default Questions; 
+export default Questions;

@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 interface User {
   _id: string;
@@ -61,8 +62,6 @@ const Users: React.FC = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [error, setError] = useState('');
 
-  const API_BASE_URL = 'http://127.0.0.1:5000/api';
-
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -71,7 +70,7 @@ const Users: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/auth/users`, {
+      const response = await axios.get(API_ENDPOINTS.ADMIN_USERS, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(response.data.users || []);
@@ -87,7 +86,7 @@ const Users: React.FC = () => {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.put(
-        `${API_BASE_URL}/auth/users/${selectedUser?._id}`,
+        `${API_ENDPOINTS.ADMIN_USERS}/${selectedUser?._id}`,
         userData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -105,7 +104,7 @@ const Users: React.FC = () => {
     if (window.confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
       try {
         const token = localStorage.getItem('adminToken');
-        await axios.delete(`${API_BASE_URL}/auth/users/${userId}`, {
+        await axios.delete(`${API_ENDPOINTS.ADMIN_USERS}/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchUsers();
@@ -205,9 +204,24 @@ const Users: React.FC = () => {
                     <Box display="flex" alignItems="center">
                       <Box
                         component="img"
-                        src={`/avatars/${user.selectedAvatar || 'avatar1.png'}`}
+                        src={user.selectedAvatar ? 
+                          `https://api.iqtestim.com/api/avatars/${user.selectedAvatar}` : 
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=FF9900&color=fff&size=40`
+                        }
                         alt="Avatar"
-                        sx={{ width: 40, height: 40, borderRadius: '50%', mr: 2 }}
+                        sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          borderRadius: '50%', 
+                          mr: 2,
+                          objectFit: 'cover',
+                          border: '2px solid #e0e0e0'
+                        }}
+                        onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                          // Avatar yüklenemezse placeholder kullan
+                          const target = e.currentTarget;
+                          target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=FF9900&color=fff&size=40`;
+                        }}
                       />
                       <Box>
                         <Typography variant="body1" fontWeight="bold">

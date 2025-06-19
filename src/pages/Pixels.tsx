@@ -140,7 +140,7 @@ const Pixels: React.FC = () => {
   const fetchPixels = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/pixels', {
+      const response = await fetch('/api/pixels', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -162,13 +162,18 @@ const Pixels: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/pixels/stats/overview`);
+      const response = await fetch('/api/pixels/stats/overview', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       }
     } catch (error) {
-      console.error('Stats yüklenirken hata:', error);
+      console.error('Error fetching stats:', error);
     }
   };
 
@@ -178,8 +183,8 @@ const Pixels: React.FC = () => {
 
     try {
       const url = editingPixel 
-        ? `http://localhost:5000/api/pixels/${editingPixel._id}`
-        : 'http://localhost:5000/api/pixels';
+        ? `/api/pixels/${editingPixel._id}`
+        : '/api/pixels';
       
       const method = editingPixel ? 'PUT' : 'POST';
       
@@ -213,7 +218,7 @@ const Pixels: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Bu pixel\'i silmek istediğinizden emin misiniz?')) {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/pixels/${id}`, {
+        const response = await fetch(`/api/pixels/${id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('adminToken')}`

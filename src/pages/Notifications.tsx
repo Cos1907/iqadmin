@@ -148,7 +148,7 @@ const Notifications: React.FC = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/notifications', {
+      const response = await fetch('/api/notifications', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -168,7 +168,7 @@ const Notifications: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/notifications/stats/overview', {
+      const response = await fetch('/api/notifications/stats/overview', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -185,7 +185,7 @@ const Notifications: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/users', {
+      const response = await fetch('/api/admin/users', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -243,8 +243,8 @@ const Notifications: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const url = editingNotification 
-        ? `http://localhost:5000/api/notifications/${editingNotification._id}`
-        : 'http://localhost:5000/api/notifications';
+        ? `/api/notifications/${editingNotification._id}`
+        : '/api/notifications';
       
       const method = editingNotification ? 'PUT' : 'POST';
       
@@ -285,7 +285,7 @@ const Notifications: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+      const response = await fetch(`/api/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -307,7 +307,7 @@ const Notifications: React.FC = () => {
 
   const handleSendNow = async (notificationId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/send`, {
+      const response = await fetch(`/api/notifications/${notificationId}/send`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`

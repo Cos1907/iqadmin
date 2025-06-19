@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // API base URL
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://91.99.157.24:3000/api';
+  const API_BASE_URL = '/api';
 
   // Axios interceptor for automatic token handling
   useEffect(() => {
@@ -87,12 +87,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
         return;
       }
-
-      console.log('Checking auth status with token:', token ? 'Token exists' : 'No token');
       
       const response = await axios.get(`${API_BASE_URL}/auth/me`);
-
-      console.log('Auth check response:', response.data);
 
       if (response.data && response.data.role === 'admin') {
         setUser(response.data);
@@ -101,7 +97,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
       localStorage.removeItem('adminToken');
       setUser(null);
     } finally {
@@ -112,14 +107,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      console.log('Attempting admin login for:', email);
       
       const response = await axios.post(`${API_BASE_URL}/auth/admin-login`, {
         email,
         password,
       });
-
-      console.log('Admin login response:', response.data);
 
       if (response.data.token && response.data.role === 'admin') {
         localStorage.setItem('adminToken', response.data.token);
@@ -129,16 +121,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: response.data.email,
           role: response.data.role,
         });
-        console.log('Admin login successful');
         return true;
       } else {
-        console.log('Admin login failed: Invalid response');
         return false;
       }
     } catch (error: any) {
-      console.error('Admin login failed:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
       return false;
     } finally {
       setLoading(false);

@@ -142,7 +142,7 @@ const Blog: React.FC = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/blog/admin/all?language=${selectedLanguage}`, {
+      const response = await fetch(`/api/blog/admin/all?language=${selectedLanguage}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -150,12 +150,12 @@ const Blog: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setPosts(data.blogs || data);
+        setPosts(Array.isArray(data.posts) ? data.posts : Array.isArray(data.blogs) ? data.blogs : []);
       } else {
-        throw new Error('Failed to fetch blog posts');
+        throw new Error('Failed to fetch posts');
       }
     } catch (error) {
-      console.error('Error fetching blog posts:', error);
+      console.error('Error fetching posts:', error);
       setSnackbar({ open: true, message: t('blog.errorLoading'), severity: 'error' });
     } finally {
       setLoading(false);
@@ -164,7 +164,7 @@ const Blog: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/blog/stats/overview', {
+      const response = await fetch('/api/blog/stats/overview', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -208,7 +208,7 @@ const Blog: React.FC = () => {
 
       console.log('Uploading image...', { file: file.name, size: file.size, type: file.type });
       
-      const response = await fetch('http://localhost:5000/api/blog/upload-image', {
+      const response = await fetch('/api/blog/upload-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -302,8 +302,8 @@ const Blog: React.FC = () => {
 
     try {
       const url = editingPost 
-        ? `http://localhost:5000/api/blog/${editingPost._id}`
-        : 'http://localhost:5000/api/blog';
+        ? `/api/blog/${editingPost._id}`
+        : '/api/blog';
       
       const method = editingPost ? 'PUT' : 'POST';
       
@@ -344,7 +344,7 @@ const Blog: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/blog/${postId}`, {
+      const response = await fetch(`/api/blog/${postId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -366,7 +366,7 @@ const Blog: React.FC = () => {
 
   const handleTogglePublish = async (post: BlogPost) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/blog/${post._id}`, {
+      const response = await fetch(`/api/blog/${post._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -395,7 +395,7 @@ const Blog: React.FC = () => {
 
   const handleToggleFeatured = async (post: BlogPost) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/blog/${post._id}`, {
+      const response = await fetch(`/api/blog/${post._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -546,7 +546,7 @@ const Blog: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {posts.map((post) => (
+              {posts.map((post: BlogPost) => (
                 <TableRow key={post._id}>
                   <TableCell>
                     <Box>
@@ -716,7 +716,7 @@ const Blog: React.FC = () => {
                 {formData.featuredImage && (
                   <Box
                     component="img"
-                    src={`http://localhost:5000${formData.featuredImage}`}
+                    src={`/api${formData.featuredImage}`}
                     alt="Featured"
                     sx={{ width: 100, height: 60, objectFit: 'cover', borderRadius: 1 }}
                   />

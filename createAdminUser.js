@@ -95,36 +95,42 @@ const User = mongoose.model('User', UserSchema);
 
 const createAdminUser = async () => {
   try {
-    console.log('Script başladı...');
+    console.log('Admin kullanıcı oluşturma scripti başladı...');
     
     // MongoDB'ye bağlan
     await mongoose.connect('mongodb://localhost:27017/quizaki');
     console.log('MongoDB\'ye bağlandı');
 
+    // Admin bilgileri (güvenlik için konsola yazdırılmaz)
+    const adminEmail = 'info@iqtestim.com';
+    const adminPassword = '!sdP5g35s!b';
+    const adminName = 'IQTESTIM Admin';
+
     // Mevcut admin kullanıcısını kontrol et
-    const existingAdmin = await User.findOne({ email: 'asil@nevo.com' });
+    const existingAdmin = await User.findOne({ email: adminEmail });
     
     if (existingAdmin) {
-      console.log('Admin kullanıcısı zaten mevcut:', existingAdmin.email);
+      console.log('Admin kullanıcısı zaten mevcut, güncelleniyor...');
       
       // Şifreyi güncelle
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('asil123', salt);
+      const hashedPassword = await bcrypt.hash(adminPassword, salt);
       
       existingAdmin.password = hashedPassword;
       existingAdmin.role = 'admin';
       existingAdmin.emailVerified = true;
+      existingAdmin.name = adminName;
       await existingAdmin.save();
       
-      console.log('Admin kullanıcısı güncellendi');
+      console.log('Admin kullanıcısı başarıyla güncellendi');
     } else {
       // Yeni admin kullanıcısı oluştur
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('asil123', salt);
+      const hashedPassword = await bcrypt.hash(adminPassword, salt);
       
       const adminUser = new User({
-        name: 'Asil Nevo',
-        email: 'asil@nevo.com',
+        name: adminName,
+        email: adminEmail,
         password: hashedPassword,
         role: 'admin',
         emailVerified: true,
@@ -134,21 +140,25 @@ const createAdminUser = async () => {
       });
       
       await adminUser.save();
-      console.log('Admin kullanıcısı oluşturuldu:', adminUser.email);
+      console.log('Admin kullanıcısı başarıyla oluşturuldu');
     }
 
-    // Tüm kullanıcıları listele
-    const users = await User.find({}, 'name email role emailVerified');
-    console.log('\nMevcut kullanıcılar:');
-    users.forEach(user => {
+    // Sadece admin kullanıcılarını listele (güvenlik için şifre gösterilmez)
+    const adminUsers = await User.find({ role: 'admin' }, 'name email role emailVerified');
+    console.log('\nAdmin kullanıcıları:');
+    adminUsers.forEach(user => {
       console.log(`- ${user.name} (${user.email}) - Role: ${user.role} - Verified: ${user.emailVerified}`);
     });
 
+    console.log('\nGiriş bilgileri:');
+    console.log(`E-posta: ${adminEmail}`);
+    console.log('Şifre: [Güvenlik nedeniyle gösterilmiyor]');
+
     mongoose.connection.close();
-    console.log('\nİşlem tamamlandı');
+    console.log('\nİşlem başarıyla tamamlandı');
     
   } catch (error) {
-    console.error('Hata:', error);
+    console.error('Hata oluştu:', error.message);
     mongoose.connection.close();
   }
 };
